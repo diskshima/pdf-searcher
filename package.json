@@ -1,0 +1,11 @@
+{
+  "name": "guideline-tool",
+  "version": "1.0.0",
+  "description": "## TODO",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Daisuke Shimamoto <diskshima@gmail.com>",
+  "license": "MIT"
+}
