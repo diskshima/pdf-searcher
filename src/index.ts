@@ -1,6 +1,14 @@
-let l: Array<number> = [1,2,3,4];
-let fn = () => 1;
+import "@babel/polyfill";
+import { PDFDocumentProxy, PDFJSStatic } from "pdfjs-dist";
 
-console.log(l);
+const PDFJS: PDFJSStatic = require( "pdfjs-dist" );
 
-console.log(fn());
+async function readDocument(path: string): Promise<void> {
+  let doc = await PDFJS.getDocument(filepath);
+  let outline = await doc.getOutline();
+  console.log(outline.map(e => e.title));
+}
+
+let filepath = process.argv[2];
+
+readDocument(filepath);
