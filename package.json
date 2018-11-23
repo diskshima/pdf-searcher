@@ -4,7 +4,11 @@
   "description": "## TODO",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "build": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
+    "clean": "rm -fr dist/*",
+    "main": "node dist/index.js",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch"
   },
   "author": "Daisuke Shimamoto <diskshima@gmail.com>",
   "license": "MIT",
@@ -12,7 +16,8 @@
     "@babel/cli": "^7.1.5",
     "@babel/core": "^7.1.6",
     "@babel/preset-env": "^7.1.6",
-    "babel-cli": "^6.26.0",
-    "pdfjs-dist": "^2.0.943"
+    "@babel/preset-typescript": "^7.1.0",
+    "pdfjs-dist": "^2.0.943",
+    "typescript": "^3.1.6"
   }
 }
