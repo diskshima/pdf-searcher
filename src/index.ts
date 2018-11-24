@@ -1,5 +1,6 @@
-import "@babel/polyfill";
-import { PDFDocumentProxy, PDFJSStatic } from "pdfjs-dist";
+import '@babel/polyfill';
+import { PDFDocumentProxy, PDFJSStatic } from 'pdfjs-dist';
+import { Client } from 'elasticsearch';
 
 const PDFJS: PDFJSStatic = require( "pdfjs-dist" );
 
@@ -19,6 +20,22 @@ async function readDocument(path: string): Promise<void> {
   }
 }
 
+let queryES = async () => {
+  let client = new Client({
+    host: 'localhost:9200',
+    log: 'trace',
+  });
+
+  let error = await client.ping({});
+  if (error) {
+    console.log('Error:', error);
+  } else {
+    console.log('Ping worked.');
+  }
+};
+
 let filepath = process.argv[2];
 
-readDocument(filepath);
+// readDocument(filepath);
+
+queryES();
