@@ -1,18 +1,31 @@
 import '@babel/polyfill';
 import { PDFDocumentProxy, PDFJSStatic } from 'pdfjs-dist';
 import { Client, GetResponse } from 'elasticsearch';
+import program from 'commander';
+
+type DocType = {
+  document: {
+    title: string,
+  },
+  page: {
+    number: number,
+  },
+  content: {
+    text: string,
+  },
+};
 
 const PDFJS: PDFJSStatic = require( "pdfjs-dist" );
-
 const DOC_TYPE = '_doc';
+const DOC_INDEX = 'documents';
 
 async function readDocument(path: string): Promise<void> {
-  let doc = await PDFJS.getDocument(filepath);
+  let doc = await PDFJS.getDocument(path);
   let outline = await doc.getOutline();
-  let pages = doc.numPages;
+  let numPages = doc.numPages;
   let titles = outline.map(e => e.title);
 
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= numPages; i++) {
     let page = await doc.getPage(i);
     let textContent = await page.getTextContent();
 
@@ -23,15 +36,21 @@ async function readDocument(path: string): Promise<void> {
 };
 
 let getClient = () => {
-  return new Client({
+  const options = {
     host: 'localhost:9200',
-    log: 'trace',
-  });
+    log: 'info',
+  };
+
+  if (program.verbose) {
+    options.log = 'trace';
+  }
+
+  return new Client(options);
 };
 
 let insertPage = async (title: string, pageNumber: number, text: string) => {
   let client = getClient();
-  let document = {
+  let document: DocType = {
     document: {
       title,
     },
@@ -45,7 +64,7 @@ let insertPage = async (title: string, pageNumber: number, text: string) => {
 
   try {
     await client.create({
-      index: 'documents',
+      index: DOC_INDEX,
       type: DOC_TYPE,
       id: `${title}_${pageNumber}`,
       body: document,
@@ -64,10 +83,45 @@ let getPage = async (index: string , id: string) => {
   return resp;
 };
 
-let filepath = process.argv[2];
+let searchDocuments = async (term: string) => {
+  let client = getClient();
 
-// readDocument(filepath);
+  let resp = await client.search({
+    index: DOC_INDEX,
+    body: {
+      query: {
+        simple_query_string : {
+          query: term,
+          default_operator: 'and',
+        },
+      },
+    }
+  });
 
-getPage('documents', 'クラウドサービス事業者が医療情報を取り扱う際の安全管理に関するガイドライン第1版_9').then((page) => {
-  console.log(page._source);
-});
+  return resp;
+};
+
+program
+  .version('0.1.0')
+  .option('-v, --verbose', 'Verbose output');
+program.command('add <path>')
+  .action((path, cmd) => {
+    readDocument(path);
+  });
+program.command('search <term>')
+  .action(async (term, cmd) => {
+    const result = await searchDocuments(term);
+    const hits = result.hits;
+    const totalCount = hits.total;
+    const outputStr = hits.hits.map((h) => {
+      const source = h._source as DocType;
+      const title = source.document.title;
+      const page = source.page.number;
+      const content = source.content.text;
+      return `${title} P.${page}: ${content}`;
+    }).join("\n");
+
+    console.log(outputStr);
+  });
+
+program.parse(process.argv);
