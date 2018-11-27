@@ -1,0 +1,41 @@
+{
+  "mappings" : {
+    "_doc" : {
+      "properties" : {
+        "content" : {
+          "properties" : {
+            "text" : {
+              "type" : "text",
+              "fields" : {
+                "japanese_field" : {
+                  "type" : "text",
+                  "analyzer" : "kuromoji"
+                }
+              }
+            }
+          }
+        },
+        "document" : {
+          "properties" : {
+            "title" : {
+              "type" : "text",
+              "fields" : {
+                "keyword" : {
+                  "type" : "keyword",
+                  "ignore_above" : 256
+                }
+              }
+            }
+          }
+        },
+        "page" : {
+          "properties" : {
+            "number" : {
+              "type" : "long"
+            }
+          }
+        }
+      }
+    }
+  }
+}
