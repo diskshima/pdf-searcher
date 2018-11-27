@@ -1,4 +1,4 @@
-# Guideline Tool
+# PDF Searcher
 ## Setup
 1. Install Node modules.
     ```bash
