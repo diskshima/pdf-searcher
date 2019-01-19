@@ -113,13 +113,19 @@ program.command('search <term>')
     const result = await searchDocuments(term);
     const hits = result.hits;
     const totalCount = hits.total;
-    const outputStr = hits.hits.map((h) => {
-      const source = h._source as DocType;
-      const title = source.document.title;
-      const page = source.page.number;
-      const content = source.content.text;
-      return `${title} P.${page}: ${content}`;
-    }).join("\n");
+    const outputStr = hits.hits
+      .sort((h1, h2) => {
+        const p1 = (h1._source as DocType).page.number;
+        const p2 = (h2._source as DocType).page.number;
+        return p1 - p2;
+      })
+      .map((h) => {
+        const source = h._source as DocType;
+        const title = source.document.title;
+        const page = source.page.number;
+        const content = source.content.text;
+        return `----------------------\n${title} P.${page}\n${content}`;
+      }).join("\n");
 
     console.log(outputStr);
   });
